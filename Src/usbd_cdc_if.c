@@ -53,6 +53,8 @@
 /* USER CODE BEGIN INCLUDE */
 #include "dataHelp.h"
 #include "cmsis_os.h"
+#include "tim.h"
+#include "gpio.h"
 /* USER CODE END INCLUDE */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -133,6 +135,7 @@ extern volatile SerialInput command;
 
 extern osThreadId pwmControlHandle;
 extern osThreadId motorResultsHandle;
+
 
 /* USER CODE END PRIVATE_VARIABLES */
 
@@ -345,7 +348,6 @@ inline void commandSelection(SerialInput input) {
 		break;
 	case Start:
 		vTaskNotifyGiveFromISR(pwmControlHandle,&xHigh);
-		vTaskNotifyGiveFromISR(motorResultsHandle,&xHigh);
 		portYIELD_FROM_ISR(xHigh);
 		break;
 
@@ -356,10 +358,20 @@ inline void commandSelection(SerialInput input) {
 
 	case Stop:
 		vTaskNotifyGiveFromISR(pwmControlHandle,&xHigh);
-		vTaskNotifyGiveFromISR(motorResultsHandle,&xHigh);
 		portYIELD_FROM_ISR(xHigh);
 		break;
-
+	case Sensor_Start:
+		xTaskNotifyFromISR(motorResultsHandle, Sensor_Start, eSetBits, &xHigh);
+		portYIELD_FROM_ISR(xHigh);
+		break;
+	case Sensor_Stop:
+		xTaskNotifyFromISR(motorResultsHandle, Sensor_Stop, eSetBits, &xHigh);
+		portYIELD_FROM_ISR(xHigh);
+		break;
+	case Reset:
+		HAL_GPIO_WritePin(SENSOR_TRIGGER_GPIO_Port,SENSOR_TRIGGER_Pin,GPIO_PIN_RESET);
+		HAL_TIM_PWM_Stop_IT(&htim4,TIM_CHANNEL_4);
+		HAL_TIM_PWM_Start_IT(&htim4,TIM_CHANNEL_4);
 	default:
 		break;
 	}

@@ -15,16 +15,16 @@ typedef struct __dataOut {
 	float time;
 	int32_t position1;
 	int32_t position2;
-	int16_t distance[5];
+	uint16_t distance[5];
 } Data;
 
 enum SerialCommand {
-	Hello = 0, Start, Continue, Stop
+	Hello = 0, Start, Continue, Stop, Sensor_Start, Sensor_Stop, Reset
 };
 
 #pragma pack(2)
 typedef struct _SerialInput {
 	enum SerialCommand Instruction;
-	int16_t PWM_INPUT1;
-	int16_t PWM_INPUT2;
+	int32_t PWM_INPUT1;
+	int32_t PWM_INPUT2;
 } SerialInput;

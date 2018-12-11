@@ -165,11 +165,45 @@ void StartLogTask(void const * argument)
   MX_USB_DEVICE_Init();
 
   /* USER CODE BEGIN StartLogTask */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
+	uint32_t notifyValue;
+	TickType_t xLastWakeTime;
+	const TickType_t xPeriod = pdMS_TO_TICKS( 100 );
+	xLastWakeTime = xTaskGetTickCount();
+	/* Infinite loop */
+	for(;;)
+	{
+		xTaskNotifyWait(pdFALSE, Sensor_Start, &notifyValue, portMAX_DELAY);
+
+
+		if ((notifyValue & Sensor_Start) == Sensor_Start) {
+			notifyValue = 0;
+			xLastWakeTime = xTaskGetTickCount();
+			while (1) {
+				vTaskDelayUntil( &xLastWakeTime, xPeriod );
+
+//				Data foo;
+//				foo.time = sizeof(Data);
+//				foo.position1 = -1;
+//				foo.position2 = -1;
+//				foo.distance[0] = htim1.Instance->CCR1;
+//				foo.distance[1] = htim1.Instance->CCR2;
+//				foo.distance[2] = htim4.Instance->CCR1;
+//				foo.distance[3] = htim4.Instance->CCR2;
+//				foo.distance[4] = htim4.Instance->CCR3;
+//
+//				dataOut = foo;
+//				CDC_Transmit_FS((uint8_t *)&dataOut,sizeof(dataOut));
+//				CDC_Transmit_FS((uint8_t *)&foo,sizeof(foo));
+
+
+				HAL_GPIO_WritePin(SENSOR_TRIGGER_GPIO_Port,SENSOR_TRIGGER_Pin,GPIO_PIN_SET);
+				HAL_TIM_PWM_Start_IT(&htim4,TIM_CHANNEL_4);
+				xTaskNotifyWait(pdFALSE, Sensor_Stop, &notifyValue, 1);
+				if ((notifyValue & Sensor_Stop) == Sensor_Stop)
+					break;
+			}
+		}
+	}
   /* USER CODE END StartLogTask */
 }
 
