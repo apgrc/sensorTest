@@ -90,6 +90,9 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define SENSOR_TRIGGER_Pin GPIO_PIN_10
 #define SENSOR_TRIGGER_GPIO_Port GPIOA
+#define SENSOR_CAPTURE_Pin GPIO_PIN_15
+#define SENSOR_CAPTURE_GPIO_Port GPIOA
+#define SENSOR_CAPTURE_EXTI_IRQn EXTI15_10_IRQn
 /* USER CODE BEGIN Private defines */
 #define maxPeriod 7199
 /* USER CODE END Private defines */

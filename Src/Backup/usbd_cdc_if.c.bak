@@ -368,6 +368,10 @@ inline void commandSelection(SerialInput input) {
 		xTaskNotifyFromISR(motorResultsHandle, Sensor_Stop, eSetBits, &xHigh);
 		portYIELD_FROM_ISR(xHigh);
 		break;
+	case Reset:
+		HAL_GPIO_WritePin(SENSOR_TRIGGER_GPIO_Port,SENSOR_TRIGGER_Pin,GPIO_PIN_RESET);
+		HAL_TIM_PWM_Stop_IT(&htim4,TIM_CHANNEL_4);
+		HAL_TIM_PWM_Start_IT(&htim4,TIM_CHANNEL_4);
 	default:
 		break;
 	}

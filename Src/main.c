@@ -140,15 +140,15 @@ int main(void)
   MX_TIM2_Init();
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
-  //HAL_TIM_Base_Start_IT(&htim4);
+  HAL_TIM_Base_Start_IT(&htim4);
 
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(SENSOR_TRIGGER_GPIO_Port, SENSOR_TRIGGER_Pin, GPIO_PIN_RESET);
   HAL_TIM_IC_Init(&htim1);
   HAL_TIM_IC_Init(&htim4);
 
 	HAL_TIM_IC_Start(&htim1,TIM_CHANNEL_1);
 	HAL_TIM_IC_Start(&htim1,TIM_CHANNEL_2);
-	HAL_TIM_IC_Start_IT(&htim4,TIM_CHANNEL_1);
+	HAL_TIM_IC_Start(&htim4,TIM_CHANNEL_1);
 	HAL_TIM_IC_Start(&htim4,TIM_CHANNEL_2);
 	HAL_TIM_IC_Start(&htim4,TIM_CHANNEL_3);
 
@@ -237,12 +237,7 @@ void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim) {
 			&&__HAL_TIM_GET_COMPARE(&htim4,TIM_CHANNEL_4) == 16) {
 		HAL_GPIO_WritePin(SENSOR_TRIGGER_GPIO_Port,SENSOR_TRIGGER_Pin,GPIO_PIN_RESET);
 
-//		__HAL_TIM_ENABLE_IT(&htim4,TIM_IT_CC1);
-	  __HAL_TIM_SET_CAPTUREPOLARITY(&htim4,
-	  		TIM_CHANNEL_1,
-	  		TIM_INPUTCHANNELPOLARITY_RISING);
 	  HAL_TIM_PWM_Stop_IT(&htim4,TIM_CHANNEL_4);
-	  HAL_TIM_IC_Start_IT(&htim4,TIM_CHANNEL_1);
 	  __HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_4,0);
 	}
 	else if (htim->Instance == htim4.Instance
@@ -259,28 +254,15 @@ void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim) {
 
 				CDC_Transmit_FS((uint8_t *)&dataOut,sizeof(dataOut));
 
-				HAL_TIM_PWM_Stop_IT(&htim4,TIM_CHANNEL_4);
-				HAL_TIM_IC_Stop(&htim4,TIM_CHANNEL_1);
-
-				__HAL_TIM_SET_CAPTUREPOLARITY(&htim4, TIM_CHANNEL_1,
-						TIM_INPUTCHANNELPOLARITY_RISING);
+				HAL_TIM_PWM_Stop_IT(&htim4,TIM_CHANNEL_4);;
 				__HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_4,16);
 	}
 }
 
-void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-
 	__HAL_TIM_SET_COUNTER(&htim1,0);
 	__HAL_TIM_SET_COUNTER(&htim4,0);
-
-	/* Disable interrupt channel 1 */
-	__HAL_TIM_DISABLE_IT(&htim4,TIM_IT_CC1);
-	__HAL_TIM_SET_CAPTUREPOLARITY(&htim1, TIM_CHANNEL_1,
-			TIM_INPUTCHANNELPOLARITY_FALLING);
-	HAL_TIM_IC_Stop_IT(&htim4,TIM_CHANNEL_1);
-	HAL_TIM_IC_Start(&htim4,TIM_CHANNEL_1);
-
 
 	__HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_4,65535);
 	HAL_TIM_PWM_Start_IT(&htim4,TIM_CHANNEL_4);
